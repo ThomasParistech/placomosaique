@@ -1,0 +1,2 @@
+add_subdirectory(hungarian_method)
+add_subdirectory(loading_capsules)

@@ -1,8 +1,7 @@
 /*********************************************************************************************************************
- * File : main.cpp                                                                                                   *
+ * File : hungarian_method_app.cpp                                                                                   *
  *                                                                                                                   *
- *                                                                                                                   *
- *                                                                                                                   *
+ * 2020 Thomas Rouch                                                                                                 *
  *********************************************************************************************************************/
 
 #include <random>
@@ -10,7 +9,8 @@
 #include <algorithm>
 #include <numeric>
 #include <vector>
-#include "hungarian_method.h"
+
+#include <hungarian_method.h>
 
 int main(int argc, char **argv)
 {
