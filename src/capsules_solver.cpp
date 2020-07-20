@@ -4,6 +4,7 @@
  * 2020 Thomas Rouch                                                                                                 *
  *********************************************************************************************************************/
 
+#include "timer.h"
 #include "capsules_solver.h"
 
 CapsulesSolver::CapsulesSolver() {}
@@ -27,12 +28,15 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
     }
 
     // Compare the reference capsules to the cutouts of the input image
-    std::cout << "Start comparing images..." << std::endl;
     std::vector<std::vector<double>> errors;
-    if (!compute_errors_matrix(ref_capsules_paths, cutouts, errors))
     {
-        std::cerr << "Failed" << std::endl;
-        return false;
+        Timer timer("Compute difference scores", Timer::MS);
+        std::cout << "Start comparing images..." << std::endl;
+        if (!compute_errors_matrix(ref_capsules_paths, cutouts, errors))
+        {
+            std::cerr << "Failed" << std::endl;
+            return false;
+        }
     }
     std::cout << "Done" << std::endl;
 
@@ -40,10 +44,13 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
     std::cout << "Start finding the optimal matches..." << std::endl;
     GaleShapleyAlgorithm algo;
     std::vector<size_t> matches;
-    if (!algo.solve(errors, matches))
     {
-        std::cerr << "Failed" << std::endl;
-        return false;
+        Timer timer("Find the optimal matching", Timer::MS);
+        if (!algo.solve(errors, matches))
+        {
+            std::cerr << "Failed" << std::endl;
+            return false;
+        }
     }
     std::cout << "Done" << std::endl;
 
