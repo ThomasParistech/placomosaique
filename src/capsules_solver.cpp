@@ -29,7 +29,7 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
     // Compare the reference capsules to the cutouts of the input image
     std::cout << "Start comparing images..." << std::endl;
     std::vector<std::vector<double>> errors;
-    if (!compute_errors_matrix(ref_capsules_paths, cutouts, circle_grid.get_cutout_size(), errors))
+    if (!compute_errors_matrix(ref_capsules_paths, cutouts, errors))
     {
         std::cerr << "Failed" << std::endl;
         return false;
@@ -78,41 +78,22 @@ bool CapsulesSolver::extract_and_display_cutouts(const CircleGridPattern &circle
     return true;
 }
 
-bool CapsulesSolver::compute_error(const cv::Mat &img_a, const cv::Mat &img_b, double &output_error)
-{
-    if (img_a.type() != img_b.type())
-    {
-        std::cerr << "Images must have the same type." << std::endl;
-        return false;
-    }
-    if (img_a.size() != img_b.size())
-    {
-        std::cerr << "Images must have the same size." << std::endl;
-        return false;
-    }
-
-    const cv::Scalar diff_means = cv::mean(img_a) - cv::mean(img_b);
-    output_error = std::sqrt(diff_means[0] * diff_means[0] + diff_means[1] * diff_means[1] + diff_means[2] * diff_means[2]);
-    return true;
-}
-
 bool CapsulesSolver::compute_errors_matrix(const std::vector<cv::String> &ref_capsules_paths,
                                            const std::vector<cv::Mat> &cutouts,
-                                           const cv::Size cutout_size,
                                            std::vector<std::vector<double>> &output_errors)
 {
     output_errors.reserve(ref_capsules_paths.size());
-    cv::Mat ref_caps, resized_ref_caps;
+    cv::Mat ref_caps;
     double output_error;
     for (const auto &ref_path : ref_capsules_paths)
     {
         output_errors.emplace_back();
         ref_caps = cv::imread(ref_path);
-        cv::resize(ref_caps, resized_ref_caps, cutout_size);
+        cv::Scalar ref_mean = cv::mean(ref_caps);
         for (const auto &cutout : cutouts)
         {
-            if (!compute_error(resized_ref_caps, cutout, output_error))
-                return false;
+            const cv::Scalar diff_means = ref_mean - cv::mean(cutout);
+            const double output_error = std::sqrt(diff_means[0] * diff_means[0] + diff_means[1] * diff_means[1] + diff_means[2] * diff_means[2]);
             output_errors.back().emplace_back(output_error);
         }
     }

@@ -17,7 +17,6 @@
 
 #include "hungarian_method.h"
 #include "circle_grid_pattern.h"
-
 #include "gale_shapley_algorithm.h"
 
 class CapsulesSolver
@@ -44,22 +43,13 @@ private:
     /// @brief Loads reference capsules and compare them to the cutouts of the input image
     /// @param ref_capsules_paths Paths to the reference capsules
     /// @param cutouts Cutouts of the original image
-    /// @param cutout_size Size of each cutout contained in @p cutouts
     /// @param output_errors Error matrix representing the difference scores between reference capsules and cutouts
     /// of the input image. Coefficient [i][j]: score between a reference capsule i and a location j in the image.
     /// The lower the score the better
     /// @return true if it was successful
     bool compute_errors_matrix(const std::vector<cv::String> &ref_capsules_paths,
                                const std::vector<cv::Mat> &cutouts,
-                               const cv::Size cutout_size,
                                std::vector<std::vector<double>> &output_errors);
-
-    /// @brief Estimates a difference score between two images of the same size and same type
-    /// @param img_a One of the two images to compare
-    /// @param img_b One of the two images to compare
-    /// @param output_error Output difference score between the two images
-    /// @return true if it was successful
-    bool compute_error(const cv::Mat &img_a, const cv::Mat &img_b, double &output_error);
 };
 
 #endif // CAPSULES_SOLVER_H
