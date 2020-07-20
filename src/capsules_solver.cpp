@@ -4,6 +4,8 @@
  * 2020 Thomas Rouch                                                                                                 *
  *********************************************************************************************************************/
 
+#include <future>
+
 #include "timer.h"
 #include "capsules_solver.h"
 
@@ -32,7 +34,7 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
     {
         Timer timer("Compute difference scores", Timer::MS);
         std::cout << "Start comparing images..." << std::endl;
-        if (!compute_errors_matrix(ref_capsules_paths, cutouts, errors))
+        if (!compute_errors_matrix_multithreaded(ref_capsules_paths, cutouts, errors))
         {
             std::cerr << "Failed" << std::endl;
             return false;
@@ -90,6 +92,12 @@ bool CapsulesSolver::compute_errors_matrix(const std::vector<cv::String> &ref_ca
                                            std::vector<std::vector<double>> &output_errors)
 {
     output_errors.reserve(ref_capsules_paths.size());
+
+    std::vector<cv::Scalar> cutouts_means;
+    cutouts_means.reserve(cutouts.size());
+    for (const auto &cutout : cutouts)
+        cutouts_means.emplace_back(cv::mean(cutout));
+
     cv::Mat ref_caps;
     double output_error;
     for (const auto &ref_path : ref_capsules_paths)
@@ -97,12 +105,53 @@ bool CapsulesSolver::compute_errors_matrix(const std::vector<cv::String> &ref_ca
         output_errors.emplace_back();
         ref_caps = cv::imread(ref_path);
         cv::Scalar ref_mean = cv::mean(ref_caps);
-        for (const auto &cutout : cutouts)
+        for (const auto &cutout_mean : cutouts_means)
         {
-            const cv::Scalar diff_means = ref_mean - cv::mean(cutout);
+            const cv::Scalar diff_means = ref_mean - cv::mean(cutout_mean);
             const double output_error = std::sqrt(diff_means[0] * diff_means[0] + diff_means[1] * diff_means[1] + diff_means[2] * diff_means[2]);
             output_errors.back().emplace_back(output_error);
         }
     }
+    return true;
+}
+
+bool CapsulesSolver::compute_errors_matrix_multithreaded(const std::vector<cv::String> &ref_capsules_paths,
+                                                         const std::vector<cv::Mat> &cutouts,
+                                                         std::vector<std::vector<double>> &output_errors)
+{
+    std::vector<cv::Scalar> cutouts_means;
+    cutouts_means.reserve(cutouts.size());
+    for (const auto &cutout : cutouts)
+        cutouts_means.emplace_back(cv::mean(cutout));
+
+    output_errors.resize(ref_capsules_paths.size());
+    std::vector<std::future<void>> futures;
+    std::mutex writing_mutex;
+
+    int idx = 0;
+    for (const auto &ref_path : ref_capsules_paths)
+    {
+        futures.push_back(std::async(std::launch::async,
+                                     [&writing_mutex](std::reference_wrapper<std::vector<double>> errors,
+                                                      std::reference_wrapper<const std::vector<cv::Scalar>> cutouts_means,
+                                                      std::reference_wrapper<const cv::String> ref_caps_path) {
+                                         const cv::Scalar ref_mean = cv::mean(cv::imread(ref_caps_path.get()));
+                                         std::vector<double> errs;
+                                         errs.reserve(cutouts_means.get().size());
+                                         for (const auto &cutout_mean : cutouts_means.get())
+                                         {
+                                             const cv::Scalar diff_means = ref_mean - cutout_mean;
+                                             const double output_error = std::sqrt(diff_means[0] * diff_means[0] + diff_means[1] * diff_means[1] + diff_means[2] * diff_means[2]);
+                                             errs.emplace_back(output_error);
+                                         }
+                                         {
+                                             std::lock_guard<std::mutex> lock(writing_mutex);
+                                             std::swap(errs, errors.get());
+                                         }
+                                     },
+                                     std::ref(output_errors[idx++]), std::cref(cutouts_means), std::cref(ref_path)));
+    }
+
+    futures.clear();
     return true;
 }
