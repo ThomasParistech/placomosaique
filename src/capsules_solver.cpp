@@ -60,7 +60,7 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
     std::cout << "Start generating the optimal image..." << std::endl;
     cv::Mat optim_display;
     {
-        Timer timer("Generate optimag image", Timer::MS);
+        Timer timer("Generate optimal image", Timer::MS);
         std::vector<cv::Mat> optim_capsules;
         optim_capsules.resize(cutouts.size());
         for (size_t i = 0; i < cutouts.size(); i++)
@@ -73,6 +73,43 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
     std::cout << "Done" << std::endl;
     cv::imwrite("/tmp/CapsulesImage.png", optim_display);
     cv::imshow("Optimal Solution", optim_display);
+    cv::waitKey();
+
+    // Show errors
+    std::cout << "Start computing the error map..." << std::endl;
+    cv::Mat error_map;
+    {
+        Timer timer("Compute the error map", Timer::MS);
+        std::vector<double> final_errors;
+        final_errors.reserve(cutouts.size());
+        for (size_t i = 0; i < cutouts.size(); i++)
+        {
+            const int j = matches[i];
+            final_errors.push_back(errors[j][i]);
+        }
+        auto it_minmax = std::minmax_element(final_errors.cbegin(), final_errors.cend());
+        const double error_min = *(it_minmax.first);
+        const double error_max = *(it_minmax.second);
+        std::cout << error_min << " -> " << error_max << std::endl;
+        const double alpha = 255.0 / (error_max - error_min);
+        const double beta = -error_min / alpha;
+
+        std::vector<cv::Mat> errors_cutouts;
+        errors_cutouts.reserve(cutouts.size());
+        for (const auto &err : final_errors)
+        {
+            const unsigned char scaled_idx = alpha * err + beta;
+            cv::Mat grey(circle_grid.get_cutout_size(), CV_8U);
+            grey.setTo(scaled_idx);
+            cv::Mat color;
+            cv::applyColorMap(grey, color, cv::ColormapTypes::COLORMAP_JET);
+            errors_cutouts.emplace_back(color);
+        }
+        circle_grid.generate_image(errors_cutouts, error_map);
+    }
+    std::cout << "Done" << std::endl;
+    cv::imwrite("/tmp/CapsulesImage_errors.png", error_map);
+    cv::imshow("Error map", error_map);
     cv::waitKey();
 }
 
