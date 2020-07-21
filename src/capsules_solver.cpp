@@ -57,15 +57,20 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
     std::cout << "Done" << std::endl;
 
     // Display solution
-    std::vector<cv::Mat> optim_capsules;
-    optim_capsules.resize(cutouts.size());
-    for (size_t i = 0; i < cutouts.size(); i++)
-    {
-        const int j = matches[i];
-        optim_capsules[i] = cv::imread(ref_capsules_paths[j]);
-    }
+    std::cout << "Start generating the optimal image..." << std::endl;
     cv::Mat optim_display;
-    circle_grid.generate_image(optim_capsules, optim_display);
+    {
+        Timer timer("Generate optimag image", Timer::MS);
+        std::vector<cv::Mat> optim_capsules;
+        optim_capsules.resize(cutouts.size());
+        for (size_t i = 0; i < cutouts.size(); i++)
+        {
+            const int j = matches[i];
+            optim_capsules[i] = cv::imread(ref_capsules_paths[j]);
+        }
+        circle_grid.generate_image(optim_capsules, optim_display);
+    }
+    std::cout << "Done" << std::endl;
     cv::imwrite("/tmp/CapsulesImage.png", optim_display);
     cv::imshow("Optimal Solution", optim_display);
     cv::waitKey();
