@@ -77,7 +77,7 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
 
     // Show errors
     std::cout << "Start computing the error map..." << std::endl;
-    cv::Mat error_map;
+    cv::Mat error_map, difficult_map;
     {
         Timer timer("Compute the error map", Timer::MS);
         std::vector<double> final_errors;
@@ -96,20 +96,31 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
 
         std::vector<cv::Mat> errors_cutouts;
         errors_cutouts.reserve(cutouts.size());
+        std::vector<cv::Mat> difficult_cutouts;
+        difficult_cutouts.insert(difficult_cutouts.begin(), cutouts.cbegin(), cutouts.cend());
+        int id = 0;
         for (const auto &err : final_errors)
         {
+
             const unsigned char scaled_idx = alpha * err + beta;
+            if (scaled_idx < 128)
+                difficult_cutouts[id].setTo(0); // Keep only capsules with bad score
+
             cv::Mat grey(circle_grid.get_cutout_size(), CV_8U);
             grey.setTo(scaled_idx);
             cv::Mat color;
             cv::applyColorMap(grey, color, cv::ColormapTypes::COLORMAP_JET);
             errors_cutouts.emplace_back(color);
+            id++;
         }
         circle_grid.generate_image(errors_cutouts, error_map);
+        circle_grid.generate_image(difficult_cutouts, difficult_map);
     }
     std::cout << "Done" << std::endl;
     cv::imwrite("/tmp/CapsulesImage_errors.png", error_map);
+    cv::imwrite("/tmp/CapsulesImage_difficults.png", difficult_map);
     cv::imshow("Error map", error_map);
+    cv::imshow("Colors badly rendered", difficult_map);
     cv::waitKey();
 }
 
