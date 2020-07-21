@@ -14,6 +14,7 @@
 
 CapsuleExtractor::CapsuleExtractor(const CapsuleExtractionPattern &capsules_pattern) : capsules_pattern_(capsules_pattern)
 {
+    n_capsules_per_image_ = capsules_pattern.get_number_of_capsules_per_image();
 }
 
 void CapsuleExtractor::extract_capsules_from_directory(const std::string &input_dir, bool display)
@@ -23,15 +24,21 @@ void CapsuleExtractor::extract_capsules_from_directory(const std::string &input_
 
     // Iterate over the directory and try extracting capsules on each picture
     cv::Mat img;
+    int n_capsules = 0;
     for (size_t i = 0; i < filenames.size(); i++)
     {
         img = cv::imread(filenames[i]);
-        if (!extract_capsules(img, display))
-            std::cerr << "Fail to extract " << filenames[i] << std::endl;
+        if (extract_capsules(i, img, display))
+        {
+            n_capsules += n_capsules_per_image_;
+            std::cout << "Loaded " << n_capsules << " capsules" << std::endl;
+        }
+        else
+            std::cerr << "Fail to extract from " << filenames[i] << std::endl;
     }
 }
 
-bool CapsuleExtractor::extract_capsules(const cv::Mat &input_img, bool display)
+bool CapsuleExtractor::extract_capsules(const size_t capsules_batch_id, const cv::Mat &input_img, bool display)
 {
     const int resized_width = (resized_height_ * input_img.cols) / input_img.rows;
     cv::resize(input_img, resized_img_, cv::Size(resized_width, resized_height_));
@@ -44,7 +51,7 @@ bool CapsuleExtractor::extract_capsules(const cv::Mat &input_img, bool display)
 
     // Extract the capsules
     cv::Mat resized_rectified_img;
-    capsules_pattern_.warp_image_and_extract_capsules(quadrilateral_contour_, resized_img_, resized_rectified_img, true);
+    capsules_pattern_.warp_image_and_extract_capsules(capsules_batch_id, quadrilateral_contour_, resized_img_, resized_rectified_img, true);
 
     // Show results
     if (display)
@@ -84,6 +91,9 @@ bool CapsuleExtractor::get_largest_contour(const cv::Mat &src_img,
     cv::findContours(ths_img_, contours_, hierarchy_, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE,
                      cv::Point(0, 0));
 
+    if (contours_.empty())
+        return false;
+
     // Find the contour with the largest area
     std::sort(contours_.begin(), contours_.end(),
               [](const std::vector<cv::Point> &left, const std::vector<cv::Point> &right) {
@@ -92,6 +102,8 @@ bool CapsuleExtractor::get_largest_contour(const cv::Mat &src_img,
 
     output_contour.clear();
     output_contour.insert(output_contour.end(), contours_[0].begin(), contours_[0].end());
+    if (contours_.size() == 1)
+        return true;
 
     // Make sure the first contour is way larger than the second one
     if (cv::contourArea(contours_[1]) < 0.1 * cv::contourArea(output_contour))

@@ -66,14 +66,19 @@ public:
     /// @brief Maps the 2D detection of the 4 corners to our reference rectangular contour and extracts capsules on it
     /// using the geometry information
     /// @note The capsules images are saved in the output directory
+    /// @param capsules_batch_id All the capsules extracted on this image share the ID of the image
     /// @param corners 4 points of the rectangle detected on the image
     /// @param src_img Image on which the rectangle has been detected
     /// @param output_rectified_image Detected ROI after the affine transformation, that makes it rectangular
     /// @param draw_circles Draw circles on @p output_rectified_image to show where capsules have been extracted
-    bool warp_image_and_extract_capsules(const std::vector<cv::Point2f> &corners,
+    bool warp_image_and_extract_capsules(const size_t capsules_batch_id,
+                                         const std::vector<cv::Point2f> &corners,
                                          const cv::Mat &src_img,
                                          cv::Mat &output_rectified_image,
                                          bool draw_circles = true);
+
+    /// @brief Gets how many capsules there are on such a pattern
+    int get_number_of_capsules_per_image() const;
 
 private:
     size_t next_capsule_id_; ///< Next ID to be assigned

@@ -66,7 +66,8 @@ CapsuleExtractionPattern::CapsuleExtractionPattern(int width,
     fs::create_directories(output_directory_);
 }
 
-bool CapsuleExtractionPattern::warp_image_and_extract_capsules(const std::vector<cv::Point2f> &corners,
+bool CapsuleExtractionPattern::warp_image_and_extract_capsules(const size_t capsules_batch_id,
+                                                               const std::vector<cv::Point2f> &corners,
                                                                const cv::Mat &src_img,
                                                                cv::Mat &output_rectified_image,
                                                                bool draw_circles)
@@ -84,7 +85,7 @@ bool CapsuleExtractionPattern::warp_image_and_extract_capsules(const std::vector
     cv::warpPerspective(src_img, output_rectified_image, H_, cv::Size(width_, height_));
 
     // Extract and save cutouts
-    const int first_id = next_capsule_id_ + 1;
+    int id = 0;
     for (const auto &row : grid_)
         for (const auto &pt : row)
         {
@@ -92,11 +93,9 @@ bool CapsuleExtractionPattern::warp_image_and_extract_capsules(const std::vector
             roi.copyTo(capsule_, capsule_mask_);
 
             std::stringstream ss;
-            ss << output_directory_ << "capsule_" << next_capsule_id_++ << ".png";
+            ss << output_directory_ << "capsule_" << capsules_batch_id << "_" << id++ << ".png";
             cv::imwrite(ss.str(), capsule_);
         }
-    std::cout << "Capsules " << first_id << " to " << next_capsule_id_
-              << " have been saved inside " << output_directory_ << std::endl;
 
     // Draw circles around the capsules
     if (draw_circles)
@@ -106,4 +105,9 @@ bool CapsuleExtractionPattern::warp_image_and_extract_capsules(const std::vector
                 cv::circle(output_rectified_image, pt, radius_, cv::Scalar(0, 0, 255), 3);
     }
     return true;
+}
+
+int CapsuleExtractionPattern::get_number_of_capsules_per_image() const
+{
+    return n_cols_ * n_rows_;
 }

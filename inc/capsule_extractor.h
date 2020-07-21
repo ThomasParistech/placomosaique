@@ -27,10 +27,11 @@ public:
 private:
     /// @brief Extracts capsules from a picture of capsules grids (warped 2D observation)
     /// @note The cutouts of the capsules will then be saved
+    /// @param capsules_batch_id All the capsules extracted on this image share the ID of the image
     /// @param input_img Picture of the capsules grid
     /// @param display Display the rectified capsules grid with circles showing where capsules have been extracted
     /// @return true if it was successful
-    bool extract_capsules(const cv::Mat &input_img, bool display);
+    bool extract_capsules(const size_t capsules_batch_id, const cv::Mat &input_img, bool display);
 
     /// @brief Finds largest contour in the image after applying a threshold on the grayscale intensity
     /// @note It aims at finding the warped contour of the rectangular capsules grid
@@ -48,7 +49,7 @@ private:
     bool fit_quadrilateral(const std::vector<cv::Point2f> &input_contour, std::vector<cv::Point2f> &output_quadrilateral);
 
     template <typename T, typename O>
-    inline T clamp_val(T val, const O min, const O max)
+    inline T clamp_val(T val, const O min, const O max) const
     {
         return std::min(static_cast<T>(max), std::max(static_cast<T>(min), val));
     }
@@ -67,6 +68,7 @@ private:
     std::vector<cv::Point2f> quadrilateral_contour_;
     std::vector<std::vector<cv::Point>> contours_;
     std::vector<cv::Vec4i> hierarchy_;
+    int n_capsules_per_image_;
 };
 
 #endif // CAPSULE_EXTRACTOR_H
