@@ -125,7 +125,6 @@ bool CapsulesSolver::extract_and_display_cutouts(const CircleGridPattern &circle
         return false;
     cv::imshow("Input image", circles_img);
     cv::waitKey();
-    cv::destroyAllWindows();
     return true;
 }
 
@@ -183,7 +182,12 @@ bool CapsulesSolver::compute_errors_matrix_multithreaded(const std::vector<cv::S
                                          for (const auto &cutout_mean : cutouts_means.get())
                                          {
                                              const cv::Scalar diff_means = ref_mean - cutout_mean;
-                                             const double output_error = std::sqrt(diff_means[0] * diff_means[0] + diff_means[1] * diff_means[1] + diff_means[2] * diff_means[2]);
+                                             const double diff_b = diff_means[0];
+                                             const double diff_g = diff_means[1];
+                                             const double diff_r = diff_means[2];
+
+                                             // Weighted Euclidean color distance
+                                             const double output_error = std::sqrt(3 * diff_r * diff_r + 4 * diff_g * diff_g + 2 * diff_b * diff_b);
                                              errs.emplace_back(output_error);
                                          }
                                          {
