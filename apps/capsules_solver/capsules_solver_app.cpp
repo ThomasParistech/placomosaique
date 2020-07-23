@@ -10,5 +10,5 @@ int main(int argc, char **argv)
 {
     const cv::Mat img = cv::imread("/home/trouch/Images/hermanville.jpg");
     CapsulesSolver solver;
-    solver.solve(img, "/tmp/Capsules", 83);
+    solver.solve(img, "/tmp/Capsules", 20);
 }
