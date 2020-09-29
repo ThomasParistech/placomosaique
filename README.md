@@ -26,7 +26,7 @@ Go to the build directory and load capsules
 ```
 bin/loading_capsules
 ```
-![](./images/load_capsules.gif =250x)
+![](./images/load_capsules.gif)
 
 Once the capsules have been loaded, run the solver
 ```
@@ -50,9 +50,9 @@ I could have ask my aunt to take a picture for every single champagne capsule sh
 - Map the case back to the perfectly aligned front view
 - Extract cutouts using the grid geometry
 
-![](./images/ths_board.png =300x)
-![](./images/contour_board.png =300x)
-![](./images/rectified_board.png =300x)
+![](./images/ths_board.png)
+![](./images/contour_board.png)
+![](./images/rectified_board.png)
 
 ## 4 - Optimization
 There are already a lot of photo-mosaics algorithms online, but their "cheating techniques" can't be applied here because we're dealing with real material ressources.
@@ -66,4 +66,4 @@ There are already a lot of photo-mosaics algorithms online, but their "cheating 
 - Compute the similarity metric between the input cutouts and each element of the capsules dataset
 - Find the optimal combination using the Gale Shapley Algorithm
 
-![](./images/agathe.png =400x)
+![](./images/agathe.png)
