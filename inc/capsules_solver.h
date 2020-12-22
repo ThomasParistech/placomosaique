@@ -34,6 +34,7 @@ private:
                                      std::vector<cv::Mat> &output_cutouts);
 
     /// @brief Loads reference capsules and compare them to the cutouts of the input image
+    /// @note Comparisons are done in parallel
     /// @param ref_capsules_paths Paths to the reference capsules
     /// @param cutouts Cutouts of the original image
     /// @param output_errors Error matrix representing the difference scores between reference capsules and cutouts
@@ -43,11 +44,6 @@ private:
     bool compute_errors_matrix(const std::vector<cv::String> &ref_capsules_paths,
                                const std::vector<cv::Mat> &cutouts,
                                std::vector<std::vector<double>> &output_errors);
-
-    /// @brief Multithreaded version of the method @ref compute_errors_matrix
-    bool compute_errors_matrix_multithreaded(const std::vector<cv::String> &ref_capsules_paths,
-                                             const std::vector<cv::Mat> &cutouts,
-                                             std::vector<std::vector<double>> &output_errors);
 };
 
 #endif // CAPSULES_SOLVER_H

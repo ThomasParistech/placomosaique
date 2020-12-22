@@ -40,7 +40,7 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
     {
         Timer timer("Compute difference scores", Timer::MS);
         std::cout << "Start comparing images..." << std::endl;
-        if (!compute_errors_matrix_multithreaded(ref_capsules_paths, cutouts, errors))
+        if (!compute_errors_matrix(ref_capsules_paths, cutouts, errors))
         {
             std::cerr << "Failed" << std::endl;
             return false;
@@ -148,34 +148,6 @@ bool CapsulesSolver::extract_and_display_cutouts(const CircleGridPattern &circle
 bool CapsulesSolver::compute_errors_matrix(const std::vector<cv::String> &ref_capsules_paths,
                                            const std::vector<cv::Mat> &cutouts,
                                            std::vector<std::vector<double>> &output_errors)
-{
-    output_errors.reserve(ref_capsules_paths.size());
-
-    std::vector<cv::Scalar> cutouts_means;
-    cutouts_means.reserve(cutouts.size());
-    for (const auto &cutout : cutouts)
-        cutouts_means.emplace_back(cv::mean(cutout));
-
-    cv::Mat ref_caps;
-    double output_error;
-    for (const auto &ref_path : ref_capsules_paths)
-    {
-        output_errors.emplace_back();
-        ref_caps = cv::imread(ref_path);
-        cv::Scalar ref_mean = cv::mean(ref_caps);
-        for (const auto &cutout_mean : cutouts_means)
-        {
-            const cv::Scalar diff_means = ref_mean - cv::mean(cutout_mean);
-            const double output_error = std::sqrt(diff_means[0] * diff_means[0] + diff_means[1] * diff_means[1] + diff_means[2] * diff_means[2]);
-            output_errors.back().emplace_back(output_error);
-        }
-    }
-    return true;
-}
-
-bool CapsulesSolver::compute_errors_matrix_multithreaded(const std::vector<cv::String> &ref_capsules_paths,
-                                                         const std::vector<cv::Mat> &cutouts,
-                                                         std::vector<std::vector<double>> &output_errors)
 {
     std::vector<cv::Scalar> cutouts_means;
     cutouts_means.reserve(cutouts.size());
