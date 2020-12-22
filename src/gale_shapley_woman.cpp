@@ -1,46 +1,14 @@
 /*********************************************************************************************************************
- * File : gale_shapley_algorithm.cpp                                                                                 *
+ * File : gale_shapley_woman.cpp                                                                                     *
  *                                                                                                                   *
  * 2020 Thomas Rouch                                                                                                 *
  *********************************************************************************************************************/
 
 #include <algorithm>
-#include <iostream>
 
-#include "gale_shapley_utils.h"
+#include "gale_shapley/gale_shapley_woman.h"
 
 size_t Woman::number_of_engaged_women = 0;
-
-Man::Man(const std::vector<int> &sorted_women_indices) : engaged(false)
-{
-    for (auto it = sorted_women_indices.cbegin(); it != sorted_women_indices.cend(); it++)
-        sorted_women.push(*it);
-}
-
-bool Man::propose_to_best_woman(size_t &best_woman_id)
-{
-    if (sorted_women.empty())
-        return false;
-
-    best_woman_id = sorted_women.top();
-    sorted_women.pop();
-    return true;
-}
-
-void Man::engage()
-{
-    engaged = true;
-}
-
-void Man::break_engagement()
-{
-    engaged = false;
-}
-
-bool Man::is_engaged() const
-{
-    return engaged;
-}
 
 Woman::Woman(const std::vector<double> &men_scores) : engaged_man_id(-1), engaged_score(-1), men_scores(men_scores) {}
 

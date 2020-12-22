@@ -8,7 +8,7 @@
 #include <iostream>
 #include <numeric>
 
-#include "gale_shapley_algorithm.h"
+#include "gale_shapley/gale_shapley_algorithm.h"
 
 GaleShapleyAlgorithm::GaleShapleyAlgorithm() {}
 

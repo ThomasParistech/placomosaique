@@ -7,10 +7,10 @@
 #ifndef GALE_SHAPLEY_ALGORITHM_H
 #define GALE_SHAPLEY_ALGORITHM_H
 
-#include <stack>
 #include <vector>
 
-#include "gale_shapley_utils.h"
+#include "gale_shapley/gale_shapley_man.h"
+#include "gale_shapley/gale_shapley_woman.h"
 
 /// @brief Algorithm for finding a solution to a stable matching problem, when there are more men than women and when
 /// affinity scores are reciprocal, i.e. a man likes a woman as much as she likes him.

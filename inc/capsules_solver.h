@@ -16,7 +16,7 @@
 #include <opencv2/imgproc.hpp>
 
 #include "circle_grid_pattern.h"
-#include "gale_shapley_algorithm.h"
+#include "gale_shapley/gale_shapley_algorithm.h"
 
 class CapsulesSolver
 {
