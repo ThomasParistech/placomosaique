@@ -1,3 +1,2 @@
 add_subdirectory(capsules_solver)
-add_subdirectory(hungarian_method)
 add_subdirectory(loading_capsules)
