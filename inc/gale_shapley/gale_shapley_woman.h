@@ -34,10 +34,10 @@ public:
     static size_t number_of_engaged_women;
 
 private:
-    int engaged_man_id;
-    double engaged_score;
-    std::vector<size_t> proposals;
-    std::vector<double> men_scores; ///< Scores, used to convert man indices to actual love scores
+    int engaged_man_id_;
+    double engaged_score_;
+    std::vector<size_t> proposals_;
+    std::vector<double> men_scores_; ///< Scores, used to convert man indices to actual love scores
 };
 
 #endif // GALE_SHAPLEY_WOMAN_H

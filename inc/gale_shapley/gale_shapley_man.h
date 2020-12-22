@@ -33,8 +33,8 @@ public:
     bool is_engaged() const;
 
 private:
-    bool engaged;
-    std::stack<size_t> sorted_women; ///< Best women on top
+    bool engaged_;
+    std::stack<size_t> sorted_women_; ///< Best women on top
 };
 
 #endif // GALE_SHAPLEY_MAN_H
