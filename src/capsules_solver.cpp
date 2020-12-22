@@ -183,30 +183,31 @@ bool CapsulesSolver::compute_errors_matrix_multithreaded(const std::vector<cv::S
     int idx = 0;
     for (const auto &ref_path : ref_capsules_paths)
     {
-        futures.push_back(std::async(std::launch::async,
-                                     [&writing_mutex](std::reference_wrapper<std::vector<double>> errors,
-                                                      std::reference_wrapper<const std::vector<cv::Scalar>> cutouts_means,
-                                                      std::reference_wrapper<const cv::String> ref_caps_path) {
-                                         const cv::Scalar ref_mean = cv::mean(cv::imread(ref_caps_path.get()));
-                                         std::vector<double> errs;
-                                         errs.reserve(cutouts_means.get().size());
-                                         for (const auto &cutout_mean : cutouts_means.get())
-                                         {
-                                             const cv::Scalar diff_means = ref_mean - cutout_mean;
-                                             const double diff_b = diff_means[0];
-                                             const double diff_g = diff_means[1];
-                                             const double diff_r = diff_means[2];
+        futures.push_back(std::async(
+            std::launch::async,
+            [&writing_mutex](std::reference_wrapper<std::vector<double>> errors,
+                             std::reference_wrapper<const std::vector<cv::Scalar>> cutouts_means,
+                             std::reference_wrapper<const cv::String> ref_caps_path) {
+                const cv::Scalar ref_mean = cv::mean(cv::imread(ref_caps_path.get()));
+                std::vector<double> errs;
+                errs.reserve(cutouts_means.get().size());
+                for (const auto &cutout_mean : cutouts_means.get())
+                {
+                    const cv::Scalar diff_means = ref_mean - cutout_mean;
+                    const double diff_b = diff_means[0];
+                    const double diff_g = diff_means[1];
+                    const double diff_r = diff_means[2];
 
-                                             // Weighted Euclidean color distance
-                                             const double output_error = std::sqrt(3 * diff_r * diff_r + 4 * diff_g * diff_g + 2 * diff_b * diff_b);
-                                             errs.emplace_back(output_error);
-                                         }
-                                         {
-                                             std::lock_guard<std::mutex> lock(writing_mutex);
-                                             std::swap(errs, errors.get());
-                                         }
-                                     },
-                                     std::ref(output_errors[idx++]), std::cref(cutouts_means), std::cref(ref_path)));
+                    // Weighted Euclidean color distance
+                    const double output_error = std::sqrt(3 * diff_r * diff_r + 4 * diff_g * diff_g + 2 * diff_b * diff_b);
+                    errs.emplace_back(output_error);
+                }
+                {
+                    std::lock_guard<std::mutex> lock(writing_mutex);
+                    std::swap(errs, errors.get());
+                }
+            },
+            std::ref(output_errors[idx++]), std::cref(cutouts_means), std::cref(ref_path)));
     }
 
     futures.clear();
