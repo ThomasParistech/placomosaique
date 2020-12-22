@@ -7,16 +7,10 @@
 #ifndef CAPSULES_SOLVER_H
 #define CAPSULES_SOLVER_H
 
-#include <iostream>
-#include <map>
-#include <vector>
 #include <opencv2/core/mat.hpp>
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
+#include <opencv2/core/cvstd.hpp>
 
-#include "circle_grid_pattern.h"
-#include "gale_shapley/gale_shapley_algorithm.h"
+class CircleGridPattern;
 
 class CapsulesSolver
 {

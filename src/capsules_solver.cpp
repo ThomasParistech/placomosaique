@@ -4,10 +4,16 @@
  * 2020 Thomas Rouch                                                                                                 *
  *********************************************************************************************************************/
 
+#include <iostream>
 #include <future>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include "timer.h"
 #include "capsules_solver.h"
+#include "circle_grid_pattern.h"
+#include "gale_shapley/gale_shapley_algorithm.h"
+#include "timer.h"
 
 CapsulesSolver::CapsulesSolver() {}
 
