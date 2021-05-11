@@ -55,13 +55,36 @@ bool GaleShapleyAlgorithm::solve(const std::vector<std::vector<double>> &input_s
     std::cout << "Gale-Shapley Algorithm: " << men_.size() << " men and " << women_.size() << " women." << std::endl;
 
     // Solve
-    if (!find_stable_configuration())
-        return false;
+    // if (!find_stable_configuration())
+    //     return false;
 
+    // output_matches.clear();
+    // output_matches.reserve(women_.size());
+    // for (const auto &woman : women_)
+    //     output_matches.emplace_back(woman.get_man_id());
+
+    // DEBUG
     output_matches.clear();
     output_matches.reserve(women_.size());
-    for (const auto &woman : women_)
-        output_matches.emplace_back(woman.get_man_id());
+    for (size_t j = 0; j < n_women; j++)
+    {
+        int best_man_id = 0;
+        double best_score = input_scores[0][j];
+
+        for (size_t i = 1; i < n_men; i++)
+        {
+            double score = input_scores[i][j];
+            if (score < best_score)
+            {
+                best_score = score;
+                best_man_id = i;
+            }
+        }
+
+        output_matches.emplace_back(best_man_id);
+    }
+
+    // DEBUG
 
     return true;
 }

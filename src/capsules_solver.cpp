@@ -128,6 +128,7 @@ bool CapsulesSolver::solve(const cv::Mat &img, const std::string &capsules_dir, 
     cv::imshow("Error map", error_map);
     cv::imshow("Colors badly rendered", difficult_map);
     cv::waitKey();
+    return true;
 }
 
 bool CapsulesSolver::extract_and_display_cutouts(const CircleGridPattern &circle_grid,

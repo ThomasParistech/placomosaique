@@ -85,7 +85,7 @@ bool CircleGridPattern::extract_cutouts(const cv::Mat &image, std::vector<cv::Ma
 
     if (image.type() != CV_8UC3)
     {
-        std::cerr << "Wrong image depth. Expected CV_8UC3. Got " << image.depth() << "." << std::endl;
+        std::cerr << "Wrong image depth. Expected CV_8UC3. Got " << image.type() << "." << std::endl;
         return false;
     }
 

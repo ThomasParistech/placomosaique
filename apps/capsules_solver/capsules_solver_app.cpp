@@ -127,6 +127,57 @@ bool parse_command_line(int argc, char *argv[], Config &config)
     return true;
 }
 
+// void test(cv::Mat img, int k)
+// {
+//     cv::imshow("Input", img);
+//     cv::waitKey();
+//     cv::Mat data;
+//     img.convertTo(data, CV_32F);          // convert to float
+//     data = data.reshape(1, data.total()); // Flatten, so that there's only one pixel per row
+//     // do kmeans
+//     cv::Mat labels, centers;
+//     cv::kmeans(data, k, labels, cv::TermCriteria(cv::TermCriteria::MAX_ITER, 10, 1.0), 3,
+//                cv::KMEANS_PP_CENTERS, centers);
+
+//     // reshape both to a single row of Vec3f pixels:
+//     centers = centers.reshape(3, centers.rows);
+//     data = data.reshape(3, data.rows);
+
+//     // replace pixel values with their center value:
+//     cv::Vec3f *p = data.ptr<cv::Vec3f>();
+//     for (size_t i = 0; i < data.rows; i++)
+//     {
+//         int center_id = labels.at<int>(i);
+//         p[i] = centers.at<cv::Vec3f>(center_id);
+//     }
+
+//     // back to 2d, and uchar:
+//     img = data.reshape(3, img.rows);
+//     img.convertTo(img, CV_8U);
+
+//     cv::imshow("Dominant color", img);
+//     cv::waitKey();
+
+//     /////////
+//     //////////
+//     int siz = 64;
+//     cv::Mat cent = centers.reshape(3, centers.rows);
+//     // make  a horizontal bar of K color patches:
+//     cv::Mat draw(siz, siz * cent.rows, cent.type(), cv::Scalar::all(0));
+//     for (int i = 0; i < cent.rows; i++)
+//     {
+//         // set the resp. ROI to that value (just fill it):
+//         draw(cv::Rect(i * siz, 0, siz, siz)) = cent.at<cv::Vec3f>(i, 0);
+//     }
+//     draw.convertTo(draw, CV_8U);
+
+//     // optional visualization:
+//     cv::imshow("CENTERS", draw);
+//     cv::waitKey();
+// }
+
+#include <opencv2/imgproc/imgproc.hpp>
+
 int main(int argc, char **argv)
 {
     Config config;
@@ -134,6 +185,10 @@ int main(int argc, char **argv)
         return 1;
 
     CapsulesSolver solver;
-    solver.solve(config.input_img, config.capsules_dir_path, config.n_rows);
+
+    cv::Mat resized_img;
+    cv::resize(config.input_img, resized_img, cv::Size(10 * config.input_img.cols, 10 * config.input_img.rows));
+    solver.solve(resized_img, config.capsules_dir_path, config.n_rows);
+    // test(input_img, config.n_rows);
     return 0;
 }

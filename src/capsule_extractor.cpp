@@ -65,6 +65,8 @@ bool CapsuleExtractor::extract_capsules(const size_t capsules_batch_id, const cv
 
         cv::imshow("Fitted contour", drawing_img_);
         cv::imshow("Rectified", resized_rectified_img);
+        cv::imwrite("/tmp/contour.png", drawing_img_);
+        cv::imwrite("/tmp/rectified.png", resized_rectified_img);
         cv::waitKey();
     }
     return true;
@@ -76,19 +78,20 @@ bool CapsuleExtractor::get_largest_contour(const cv::Mat &src_img,
                                            int ths)
 {
     // Convert it to gray
-    cv::cvtColor(src_img, src_gray_, CV_BGR2GRAY);
+    cv::cvtColor(src_img, src_gray_, cv::COLOR_BGR2GRAY);
     cv::threshold(src_gray_, ths_img_, ths, 255, cv::THRESH_BINARY_INV);
 
     if (display)
     {
         cv::imshow("Thresholded image", ths_img_);
+        cv::imwrite("/tmp/ths.png", ths_img_);
         cv::waitKey();
     }
 
     // Find contours
     contours_.clear();
     hierarchy_.clear();
-    cv::findContours(ths_img_, contours_, hierarchy_, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE,
+    cv::findContours(ths_img_, contours_, hierarchy_, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE,
                      cv::Point(0, 0));
 
     if (contours_.empty())
